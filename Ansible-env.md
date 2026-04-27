@@ -78,6 +78,48 @@ There are many different ways to write playbooks. The most basic playbook is the
       ansible.builtin.ping:
 ````
 
+Here for example is a playbook with the installation of an apache webserver:
+````bash
+---
+- name: Install Apache Webserver
+  hosts: web
+  become: yes
+  tasks:
+
+    - name: Enable Repos on RHEL
+      ansible.builtin.command:
+        cmd: dnf config-manager --set-enabled baseos appstream
+      when: ansible_os_family == "RedHat"
+
+    - name: Install Apache on RHEL/CentOS
+      ansible.builtin.dnf:
+        name: httpd
+        state: present
+        update_cache: yes
+      when: ansible_os_family == "RedHat"
+
+    - name: Install Apache on Ubuntu/Debian
+      ansible.builtin.apt:
+        name: apache2
+        state: present
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Start and enable Apache on RHEL
+      ansible.builtin.service:
+        name: httpd
+        state: started
+        enabled: yes
+      when: ansible_os_family == "RedHat"
+
+    - name: Start and enable Apache on Ubuntu
+      ansible.builtin.service:
+        name: apache2
+        state: started
+        enabled: yes
+      when: ansible_os_family == "Debian"
+````
+
 ## Troubleshoot
 
 There may be many things why Ansible won´t work:
